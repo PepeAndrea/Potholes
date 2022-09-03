@@ -6,7 +6,7 @@
 #include <unistd.h>
 #include "../Headers/helper_header.h"
 
-#define MAX_LOG 100
+#define MAX_LOG 1024
 
 char *logfile = "Log/log.txt";
 
