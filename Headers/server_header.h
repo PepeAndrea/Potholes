@@ -1,19 +1,10 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdbool.h>
-#include <string.h>
-#include <fcntl.h>
-#include <sys/socket.h>
-#include <sys/types.h>
-#include <sys/un.h>
-#include <sys/stat.h>
-#include <arpa/inet.h>
-#include <pthread.h>
-#include <signal.h>
-#include <sqlite3.h>
-#include <netdb.h>
-#include <netinet/in.h>
-#include <unistd.h>
+#ifndef Server
+#define Server
 
-#define MAX_BUFFER 150
-#define PORT 8585
+void *requestHandler(void *thread_client_sd);
+void getAllPotholes(int client_sd, sqlite3* database);
+void getNearPotholes(int client_sd, sqlite3* database);
+void insertPotholes(int client_sd, sqlite3* database);
+void getThreshold(int client_sd, sqlite3* database);
+
+#endif 
