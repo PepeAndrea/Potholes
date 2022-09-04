@@ -4,7 +4,6 @@
 #include <string.h>
 #include <fcntl.h>
 #include <unistd.h>
-#include "../Headers/helper_header.h"
 
 #define MAX_LOG 1024
 

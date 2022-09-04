@@ -16,6 +16,7 @@
 #include <unistd.h>
 #include "../Headers/server_header.h"
 #include "../Headers/helper_header.h"
+#include "../Headers/database_header.h"
 
 #define MAX_BUFFER 150
 #define PORT 8585
@@ -42,6 +43,12 @@ int main(int argc, char const *argv[])
     pthread_attr_t thread_attr;
     int create_request_thread_status;
     pthread_t requets_thread;
+
+
+    //! Setup signal handler for server shutdown
+    signal(SIGUSR1, signalHandler);
+    signal(SIGUSR2, signalHandler);
+    signal(SIGINT, signalHandler);
 
 
     //! Create socket
@@ -161,7 +168,8 @@ void *requestHandler(void *thread_client_sd) {
             getThreshold(client_sd, database);
         }else{
             log_e("404", "Action non gestibile dal server");
-            send(client_sd, "ERROR 404 - Action non gestibile", strlen("ERROR 404 - Action non gestibile"), 0);
+            send(client_sd, "ERROR 404 - Action non gestibile\n", strlen("ERROR 404 - Action non gestibile\n"), 0);
+            sleep(2);
         }
     }
     
@@ -172,20 +180,116 @@ void *requestHandler(void *thread_client_sd) {
     return NULL;
 }
 
+
+//? Handle getAllPotholes request
 void getAllPotholes(int client_sd, sqlite3* database){
-    send(client_sd, "Richiesta getAllPotholes ricevuta\n", strlen("Richiesta getAllPotholes ricevuta\n"), 0);
+    getAllPotholes_DB(client_sd,database);
 }
 
+//? Handle getNearPotholes request
 void getNearPotholes(int client_sd, sqlite3* database){
-    send(client_sd, "Richiesta getNearPotholes ricevuta\n", strlen("Richiesta getNearPotholes ricevuta\n"), 0);
+
+    char username[20];
+    double latitude = 0, longitude = 0, raggio = 0;
+
+    //? Socket Buffer
+    char buffer[MAX_BUFFER] = { 0 };
+    bzero(buffer,sizeof(buffer));
+
+    //! Check if data sent by client are valid
+    recv(client_sd, buffer, sizeof(buffer), 0);
+    log_m("Dati inviati dal client",buffer);
+
+    //? Get first token
+    char *paramData = strtok(buffer, ";");
+    if (paramData == NULL){
+        log_e("paramData","Parametri inviati non validi");
+        return;
+    }
+
+    //! Extract other params and fill variables
+    strcpy(username, paramData);
+
+    if ((paramData = strtok(NULL, ";")) == NULL){
+        log_e("paramData","Parametri inviati non validi");
+        return;
+    }
+    latitude = atof(paramData);
+    
+    if ((paramData = strtok(NULL, ";")) == NULL){
+        log_e("paramData","Parametri inviati non validi");
+        return;
+    }
+    longitude = atof(paramData);
+    
+    if ((paramData = strtok(NULL, ";")) == NULL){
+        log_e("paramData","Parametri inviati non validi");
+        return;
+    }
+    raggio = atof(paramData);
+
+    //! Retrieve data from DB
+    getNearPotholes_DB(client_sd,database,latitude,longitude,raggio);
 }
 
+//? Handle insertPotholes request
 void insertPotholes(int client_sd, sqlite3* database){
-    send(client_sd, "Richiesta insertPotholes ricevuta\n", strlen("Richiesta insertPotholes ricevuta\n"), 0);
+    char username[20];
+    double latitude = 0, longitude = 0, variation = 0;
+
+    //? Socket Buffer
+    char buffer[MAX_BUFFER] = { 0 };
+    bzero(buffer,sizeof(buffer));
+
+    //! Check if data sent by client are valid
+    recv(client_sd, buffer, sizeof(buffer), 0);
+    log_m("Dati inviati dal client",buffer);
+
+    //? Get first token
+    char *paramData = strtok(buffer, ";");
+    if (paramData == NULL){
+        log_e("paramData","Parametri inviati non validi");
+        return;
+    }
+
+    //! Extract other params and fill variables
+    strcpy(username, paramData);
+
+    if ((paramData = strtok(NULL, ";")) == NULL){
+        log_e("paramData","Parametri inviati non validi");
+        return;
+    }
+    latitude = atof(paramData);
+    
+    if ((paramData = strtok(NULL, ";")) == NULL){
+        log_e("paramData","Parametri inviati non validi");
+        return;
+    }
+    longitude = atof(paramData);
+    
+    if ((paramData = strtok(NULL, ";")) == NULL){
+        log_e("paramData","Parametri inviati non validi");
+        return;
+    }
+    variation = atof(paramData);
+
+    //! Insert data in DB
+    insertPotholes_DB(client_sd,database,username,latitude,longitude,variation);
 }
 
+//? Handle getThreshold request
 void getThreshold(int client_sd, sqlite3* database){
     char threshold[5];
     sprintf(threshold,"%d\n",THRESHOLD);
     send(client_sd, threshold, strlen(threshold), 0);
+}
+
+//? Handle signal from the OS
+void signalHandler(int signal){
+  char sig[10];
+  sprintf(sig,"%d",signal);
+  log_m("Signal ricevuto",sig);
+  close(server_sd);
+  log_m("Signal processato", "Server disattivato");
+  exit(EXIT_SUCCESS);
 }
