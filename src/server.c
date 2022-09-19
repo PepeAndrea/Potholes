@@ -20,7 +20,7 @@
 
 #define MAX_BUFFER 150
 #define PORT 8585
-#define THRESHOLD 1 
+#define THRESHOLD 15 
 
 //? Static Server Socket descriptor 
 static int server_sd;
