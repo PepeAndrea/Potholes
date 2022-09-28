@@ -32,6 +32,9 @@ int main(int argc, char const *argv[])
     query_status = sqlite3_exec(database, query, NULL, NULL, NULL);
     sqlite3_free(query);
 
+    //! Valori iniziali per popolare il db
+    //? TOGLIERE COMMENRI SOLO PER SCOPI DI DEBUG
+    /*
     for (int i = 0; i < 10; i++)
     {
         query = sqlite3_mprintf("INSERT INTO Potholes VALUES ('%s', %d, %d, %d);", "Andrea", i, i, rand()%9);
@@ -42,6 +45,7 @@ int main(int argc, char const *argv[])
         }
         sqlite3_free(query);
     }
+    */
 
     return 0;
 }

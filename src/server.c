@@ -110,7 +110,7 @@ int main(int argc, char const *argv[])
         *(thread_client_sd) = client_sd;
 
         //! Start request thread
-        create_request_thread_status = pthread_create(&requets_thread, &thread_attr, requestHandler, (void *) thread_client_sd);
+        create_request_thread_status = pthread_create(&requets_thread, &thread_attr, requestDispatcher, (void *) thread_client_sd);
 
         if(create_request_thread_status < 0)
             log_e("pthread_create", "Errore durante la creazione di un nuovo thread");
@@ -128,7 +128,7 @@ int main(int argc, char const *argv[])
 }
 
 //? Callback di partenza del thread
-void *requestHandler(void *thread_client_sd) {
+void *requestDispatcher(void *thread_client_sd) {
     
     //? Set client socket descriptor
     int client_sd = *(int *) thread_client_sd;
