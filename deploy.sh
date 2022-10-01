@@ -5,7 +5,7 @@ install() {
     ./potholes_server_setup
 
     gcc src/* -o potholes_server -lsqlite3 -pthread
-    ./potholes_server
+    ./potholes_server &
 }
 
 
@@ -25,7 +25,7 @@ case $1 in
 
   "start")
     if [[ -f "Database/database.db" ]] && [[ -f "potholes_server" ]]; then
-        ./potholes_server
+        ./potholes_server &
     else
         install
     fi
