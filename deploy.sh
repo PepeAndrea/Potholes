@@ -1,11 +1,17 @@
 #!/bin/bash
 
 install() {
+    #Create file
+    mkdir Database Log
+    touch Database/database.db Log/log.txt
+
+    #setup database
     gcc Setup/setup.c -o potholes_server_setup -lsqlite3
     ./potholes_server_setup
 
+    #compile server
     gcc src/* -o potholes_server -lsqlite3 -pthread
-    ./potholes_server &
+  
 }
 
 
@@ -24,10 +30,11 @@ case $1 in
     ;;
 
   "start")
-    if [[ -f "Database/database.db" ]] && [[ -f "potholes_server" ]]; then
+    if [[ -f "Database/database.db" ]] && [[ -f "Log/log.txt" ]] && [[ -f "potholes_server" ]]; then
         ./potholes_server &
     else
         install
+        ./potholes_server &
     fi
 
     ;;
