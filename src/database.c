@@ -14,6 +14,7 @@
 #include <netdb.h>
 #include <netinet/in.h>
 #include <unistd.h>
+#include <math.h>
 #include "../Headers/helper_header.h"
 #include "../Headers/database_header.h"
 
@@ -76,11 +77,20 @@ void getNearPotholes_DB(int client_sd, sqlite3* database,double latitude,double 
         return;
     }
 
+    //? Latitude-Longitude Bounding box
+    //1 deg latitude ~ 111km
+    //1 deg longitude ~ 111*cos(latitude*pi/180) km    
+    double latBox = radius/111;
+    double cosArg = latitude*M_PI/180;
+    double longBox =(radius * cos(cosArg))/(111*cos(cosArg));
+
+
+
     //! Binding data in prepared statement
-    sqlite3_bind_double(stmt,1,latitude-radius);
-    sqlite3_bind_double(stmt,2,latitude+radius);
-    sqlite3_bind_double(stmt,3,longitude-radius);
-    sqlite3_bind_double(stmt,4,longitude+radius);
+    sqlite3_bind_double(stmt,1,latitude-latBox);
+    sqlite3_bind_double(stmt,2,latitude+latBox);
+    sqlite3_bind_double(stmt,3,longitude-longBox);
+    sqlite3_bind_double(stmt,4,longitude+longBox);
 
     log_m("Query preparata",sqlite3_expanded_sql(stmt));
     
