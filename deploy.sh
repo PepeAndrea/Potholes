@@ -10,7 +10,7 @@ install() {
     ./potholes_server_setup
 
     #compile server
-    gcc src/* -o potholes_server -lsqlite3 -pthread
+    gcc src/* -o potholes_server -lsqlite3 -pthread -lm
   
 }
 
